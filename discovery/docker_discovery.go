@@ -72,7 +72,7 @@ func (d *DockerDiscovery) Services() []service.Service {
 
 func (d *DockerDiscovery) getContainers() {
 	// New connection every time
-	client, _ := docker.NewClient(d.endpoint)
+	client, _ := docker.NewClientFromEnv()
 	containers, err := client.ListContainers(docker.ListContainersOptions{All: false})
 	if err != nil {
 		return
@@ -90,7 +90,7 @@ func (d *DockerDiscovery) getContainers() {
 }
 
 func (d *DockerDiscovery) watchEvents(quit chan bool) {
-	client, _ := docker.NewClient(d.endpoint)
+	client, _ := docker.NewClientFromEnv()
 	client.AddEventListener(d.events)
 
 	// Health check the connection and set it back up when it goes away.
@@ -102,7 +102,7 @@ func (d *DockerDiscovery) watchEvents(quit chan bool) {
 			client.RemoveEventListener(d.events)
 			d.events = make(chan *docker.APIEvents) // RemoveEventListener closes it
 
-			client, err = docker.NewClient(d.endpoint)
+			client, err = docker.NewClientFromEnv()
 			if err == nil {
 				client.AddEventListener(d.events)
 			} else {
